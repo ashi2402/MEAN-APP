@@ -3,8 +3,13 @@ const errorMiddleware = require('./middleware/error.middleware');
 const cors = require('cors');
 
 const app = express();
+const allowedOrigins = [
+  'http://localhost:4200',
+  'https://resplendent-daffodil-a41343.netlify.app'
+];
+
 app.use(cors({
-  origin: 'http://localhost:4200'
+  origin:allowedOrigins
 }));
 
 app.use(express.json());
