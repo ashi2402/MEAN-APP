@@ -1,0 +1,196 @@
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <h2>PeopleHub</h2>
+    <nav>
+      <a class="active" href="#">Dashboard</a>
+      <a href="#">Employees</a>
+      <a href="#">Departments</a>
+      <a href="#">Settings</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1>Employee Dashboard</h1>
+        <p>Manage your team in one place.</p>
+      </div>
+      <button type="button" >+ Add Employee</button>
+      <button type="button" (click)="onLogout()">Logout</button>
+    </header>
+ 
+  
+
+<section class="employee-section add-employee-section">
+  <h2>{{ editingEmployeeId() ? 'Edit Employee' : 'Add Employee' }}</h2>
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="name">Full name</label>
+        <input id="name" type="text" formControlName="name"
+               placeholder="Enter full name" />
+
+        @if (employeeForm.controls.name.touched &&
+             employeeForm.controls.name.invalid) {
+          <small class="error">
+            Name is required and must contain at least 3 characters.
+          </small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email"
+               placeholder="name@example.com" />
+
+        @if (employeeForm.controls.email.touched &&
+             employeeForm.controls.email.invalid) {
+          <small class="error">Enter a valid email address.</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="department">Department</label>
+        <select id="department" formControlName="department">
+          <option value="">Select department</option>
+          <option value="Engineering">Engineering</option>
+          <option value="HR">HR</option>
+          <option value="Finance">Finance</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="role">Role</label>
+        <input id="role" type="text" formControlName="role"
+               placeholder="Enter job title" />
+      </div>
+
+      <div class="form-field">
+        <label for="age">Age</label>
+        <input id="age" type="number" formControlName="age" min="18" />
+
+        @if (employeeForm.controls.age.touched &&
+             employeeForm.controls.age.invalid) {
+          <small class="error">Age must be at least 18.</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="salary">Salary</label>
+        <input id="salary" type="number" formControlName="salary" min="0" />
+
+        @if (employeeForm.controls.salary.touched &&
+             employeeForm.controls.salary.invalid) {
+          <small class="error">Salary cannot be negative.</small>
+        }
+      </div>
+    </div>
+
+    <div class="form-actions">
+  <label class="checkbox-label">
+    <input type="checkbox" formControlName="active" />
+    Active employee
+  </label>
+
+  <div>
+    <button type="submit">
+      {{ editingEmployeeId() ? 'Update Employee' : 'Save Employee' }}
+    </button>
+
+    @if (editingEmployeeId()) {
+      <button type="button" (click)="cancelEdit()">
+        Cancel
+      </button>
+    }
+  </div>
+</div>
+  </form>
+</section>
+
+
+
+    <section class="summary-cards">
+      <article class="summary-card">
+        <p>Total Employees</p>
+        <h2>{{ totalEmployees() }}</h2>
+      </article>
+
+      <article class="summary-card">
+        <p>Active Employees</p>
+        <h2>{{ activeEmployees() }}</h2>
+      </article>
+
+      <article class="summary-card">
+        <p>Inactive Employees</p>
+        <h2>{{ inactiveEmployees() }}</h2>
+      </article>
+    </section>
+
+    
+<section class="employee-section">
+  <h2>Employees</h2>
+
+  <input
+    type="search"
+    placeholder="Search by name, email, department or role..."
+    [value]="searchTerm()"
+    (input)="searchTerm.set($any($event.target).value)"
+  />
+
+  <div class="employee-table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      @for (employee of filteredEmployees(); track employee._id ?? employee.id) {
+          <tr>
+            <td>{{ employee.name }}</td>
+            <td>{{ employee.email }}</td>
+            <td>{{ employee.department }}</td>
+            <td>{{ employee.role }}</td>
+            <td>
+              <span
+                class="status"
+                [class.active]="employee.active"
+                [class.inactive]="!employee.active"
+              >
+                {{ employee.active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+  <button
+    type="button"
+    (click)="editEmployee(employee)">
+    Edit
+  </button>
+
+  <button
+    type="button"
+    (click)="deleteEmployee(employee)">
+    Delete
+  </button>
+</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6">No employees found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+  </main>
+</div>
