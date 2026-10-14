@@ -1,44 +1,56 @@
+
 const express = require('express');
 const errorMiddleware = require('./middleware/error.middleware');
 const cors = require('cors');
 
 const app = express();
+
 const allowedOrigins = [
   'http://localhost:4200',
   'https://resplendent-daffodil-a41343.netlify.app'
 ];
 
+// 1. CORS must run before the routes and JSON parser.
 app.use(cors({
   origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use((req, res, next) => {
-  console.log(
-    `[REQUEST] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin || 'none'}`
-  );
-  next();
-});
+// 2. Log request metadata and assign a request ID.
 app.use((req, res, next) => {
   const requestId = Date.now().toString(36);
+
+  req.requestId = requestId;
+  res.setHeader('X-Debug-Request-Id', requestId);
 
   console.log('[REQUEST START]', {
     requestId,
     method: req.method,
     url: req.originalUrl,
     origin: req.headers.origin,
-    contentType: req.headers['content-type']
+    contentType: req.headers['content-type'],
+    contentLength: req.headers['content-length']
   });
 
-  res.setHeader('X-Debug-Request-Id', requestId);
   next();
 });
 
-app.use(express.json());
+// 3. Temporarily log the raw body before JSON parsing.
+app.use(express.json({
+  verify: (req, res, buffer) => {
+    console.log('[RAW BODY]', {
+      requestId: req.requestId,
+      body: buffer.toString('utf8')
+    });
+  }
+}));
+
+// 4. Handle malformed JSON.
 app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
-    console.error('Malformed JSON:', {
+    console.error('[MALFORMED JSON]', {
+      requestId: req.requestId,
       method: req.method,
       url: req.originalUrl,
       body: err.body
@@ -51,11 +63,15 @@ app.use((err, req, res, next) => {
 
   next(err);
 });
+
+// 5. Routes.
 const employeeRoute = require('./routes/employee.route');
 const authRoute = require('./routes/auth.route');
 
 app.use('/api/employees', employeeRoute);
 app.use('/api/auth', authRoute);
 
+// 6. General error middleware.
 app.use(errorMiddleware);
+
 module.exports = app;
