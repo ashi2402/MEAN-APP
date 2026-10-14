@@ -20,21 +20,27 @@ let refreshRequest$: Observable<LoginResponse> | null = null;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = authService.getAccessToken();
+
+  const isLoginRequest = req.url.includes('/api/auth/login');
+  const isRefreshRequest = req.url.includes('/api/auth/refresh');
+
+  // Login and refresh requests should not carry an old access token.
+  const token = isLoginRequest || isRefreshRequest
+    ? null
+    : authService.getAccessToken();
 
   const authRequest = token ? addToken(req, token) : req;
 
   return next(authRequest).pipe(
     catchError((error: HttpErrorResponse) => {
-      const isUnauthorized = error.status === 401;
-      const isRefreshRequest = req.url.includes('/api/auth/refresh');
-      const isLoginRequest = req.url.includes('/api/auth/login');
-
-      if (!isUnauthorized || isRefreshRequest || isLoginRequest) {
+      if (
+        error.status !== 401 ||
+        isRefreshRequest ||
+        isLoginRequest
+      ) {
         return throwError(() => error);
       }
 
-      // Start a refresh only if one isn't already running.
       if (!refreshRequest$) {
         refreshRequest$ = authService.refreshAccessToken().pipe(
           finalize(() => {
@@ -44,7 +50,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         );
       }
 
-      // All concurrent 401 requests share the same refresh result.
       return refreshRequest$.pipe(
         switchMap((response) => {
           const retryRequest = addToken(req, response.token);
