@@ -32,6 +32,15 @@ const frontendPath = path.join(
   '../../employee-management-ui/dist/employee-management-ui/browser'
 );
 
+const fs = require('fs');
+
+console.log('[FRONTEND PATH]', frontendPath);
+console.log('[FRONTEND EXISTS]', fs.existsSync(frontendPath));
+console.log(
+  '[INDEX EXISTS]',
+  fs.existsSync(path.join(frontendPath, 'index.html'))
+);
+
 app.use(express.static(frontendPath));
 
 // Angular SPA fallback.
