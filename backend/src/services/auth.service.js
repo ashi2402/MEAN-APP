@@ -18,38 +18,61 @@ async function registerUser(email, password) {
     }
 }
 
+
 async function loginUser(email, password) {
-    const userEmail = await User.findOne({ email: email.trim().toLowerCase() });
+    const userEmail = await User.findOne({
+        email: email.trim().toLowerCase()
+    });
+
     if (!userEmail) {
-        throw new Error('Invalid email or password');
+        const error = new Error('Invalid email or password');
+        error.statusCode = 401;
+        throw error;
     }
-    const isPasswordMatch = await bcrypt.compare(password, userEmail.password);
+
+    const isPasswordMatch = await bcrypt.compare(
+        password,
+        userEmail.password
+    );
+
     if (!isPasswordMatch) {
-        throw new Error('Invalid email or password');
+        const error = new Error('Invalid email or password');
+        error.statusCode = 401;
+        throw error;
     }
+
     const refreshToken = crypto.randomBytes(64).toString('hex');
+
     const refreshTokenHash = crypto
         .createHash('sha256')
         .update(refreshToken)
         .digest('hex');
+
     const refreshTokenExpiresAt = new Date(
         Date.now() + 7 * 24 * 60 * 60 * 1000
     );
+
     userEmail.refreshTokenHash = refreshTokenHash;
     userEmail.refreshTokenExpiresAt = refreshTokenExpiresAt;
 
     await userEmail.save();
+
     const payload = {
         _id: userEmail._id,
         role: userEmail.role
     };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: '15m'
+    });
+
     return {
         userId: userEmail._id,
-        token: token,
-        refreshToken: refreshToken
-    }
+        token,
+        refreshToken
+    };
 }
+
 
 async function refreshAccessToken(refreshToken) {
     if(!refreshToken) {
