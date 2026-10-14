@@ -20,8 +20,37 @@ app.use((req, res, next) => {
   );
   next();
 });
+app.use((req, res, next) => {
+  const requestId = Date.now().toString(36);
+
+  console.log('[REQUEST START]', {
+    requestId,
+    method: req.method,
+    url: req.originalUrl,
+    origin: req.headers.origin,
+    contentType: req.headers['content-type']
+  });
+
+  res.setHeader('X-Debug-Request-Id', requestId);
+  next();
+});
 
 app.use(express.json());
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed') {
+    console.error('Malformed JSON:', {
+      method: req.method,
+      url: req.originalUrl,
+      body: err.body
+    });
+
+    return res.status(400).json({
+      message: 'Invalid JSON request body'
+    });
+  }
+
+  next(err);
+});
 const employeeRoute = require('./routes/employee.route');
 const authRoute = require('./routes/auth.route');
 
