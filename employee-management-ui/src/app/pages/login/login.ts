@@ -20,7 +20,7 @@ export class Login {
   private authService = inject(AuthService);
 private router = inject(Router);
   loading = signal(false);
-  
+
   errorMessage = signal('');
 
   loginForm = new FormGroup({
@@ -40,6 +40,13 @@ onSubmit() {
     this.loginForm.markAllAsTouched();
     return;
   }
+
+  const credentials = this.loginForm.getRawValue();
+
+  // Temporary debugging — do not log the password.
+  console.log('Email:', credentials.email);
+  console.log('Password type:', typeof credentials.password);
+  console.log('Credentials are an object:', typeof credentials === 'object');
 
   this.authService.login(this.loginForm.getRawValue()).subscribe({
     next: () => {
