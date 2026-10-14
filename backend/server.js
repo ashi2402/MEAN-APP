@@ -1,17 +1,18 @@
+
 require('dotenv').config();
 
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
 
-connectDB().then(() => {
-    app.listen(3000, () => {
-        console.log('server is running on port 3000');
+const PORT = process.env.PORT || 3000;
+
+connectDB()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Error connecting to database:', error);
+        process.exit(1);
     });
-}).catch((error) => {
-    console.log("Error in connection", error);
-});
-
-
-
-
-

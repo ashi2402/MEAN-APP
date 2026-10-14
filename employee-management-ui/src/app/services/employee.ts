@@ -50,7 +50,7 @@ export interface Employee {
 export class EmployeeService {
   private http = inject(HttpClient);
 
-  private apiUrl = 'https://mean-employee-api.onrender.com/api/employees';
+  private apiUrl = 'api/employees';
 
   getEmployees() {
     return this.http.get<EmployeeResponse>(this.apiUrl);

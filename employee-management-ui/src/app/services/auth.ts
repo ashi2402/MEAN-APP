@@ -20,7 +20,7 @@ export interface LoginResponse {
 export class AuthService {
   private http = inject(HttpClient);
 
-  private apiUrl = 'https://mean-employee-api.onrender.com/api/auth';
+  private apiUrl = '/api/auth';
 
   isAuthenticated = signal(false);
 
