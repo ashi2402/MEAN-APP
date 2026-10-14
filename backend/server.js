@@ -1,3 +1,4 @@
+console.log('DEPLOY CHECK: server.js version 1734eba');
 
 require('dotenv').config();
 
@@ -5,6 +6,8 @@ const app = require('./src/app');
 const connectDB = require('./src/config/db');
 
 const PORT = process.env.PORT || 3000;
+
+console.log('DEPLOY CHECK: PORT =', PORT);
 
 connectDB()
   .then(() => {
