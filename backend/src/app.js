@@ -17,6 +17,20 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    console.log('[RESPONSE]', {
+      method: req.method,
+      url: req.originalUrl,
+      status: res.statusCode,
+      origin: req.headers.origin,
+      allowOrigin: res.getHeader('Access-Control-Allow-Origin')
+    });
+  });
+
+  next();
+});
+
 // 2. Log request metadata and assign a request ID.
 app.use((req, res, next) => {
   const requestId = Date.now().toString(36);
