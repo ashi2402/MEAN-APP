@@ -14,6 +14,13 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.use((req, res, next) => {
+  console.log(
+    `[REQUEST] ${req.method} ${req.originalUrl} | Origin: ${req.headers.origin || 'none'}`
+  );
+  next();
+});
+
 app.use(express.json());
 const employeeRoute = require('./routes/employee.route');
 const authRoute = require('./routes/auth.route');
