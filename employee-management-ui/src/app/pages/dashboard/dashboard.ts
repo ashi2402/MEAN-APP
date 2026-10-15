@@ -16,16 +16,13 @@ export class Dashboard  implements OnInit {
 private authService = inject(AuthService);
   employees = signal<Employee[]>([]);
 editingEmployeeId = signal<string | null>(null);
+
   ngOnInit(): void {
-    this.employeeService.getEmployees().subscribe({
-      next: (response) => {
-        this.employees.set(response.employees);
-      },
-      error: (error) => {
-        console.error('Error fetching employees:', error);
-      }
-    });
-  }
+  this.loadEmployees();
+}
+
+
+
   searchTerm = signal('');
   totalEmployees = computed(() => this.employees().length);
   activeEmployees = computed(() => this.employees().filter(employee => employee.active).length);
@@ -41,6 +38,17 @@ editingEmployeeId = signal<string | null>(null);
         .includes(search)
     );
   });
+
+  loadEmployees() {
+  this.employeeService.getEmployees().subscribe({
+    next: (response) => {
+      this.employees.set(response.employees);
+    },
+    error: (error) => {
+      console.error('Failed to load employees:', error);
+    }
+  });
+}
 
 
   addFilter() {
@@ -190,10 +198,9 @@ deleteEmployee(employee: Employee) {
   }
 
   this.employeeService.deleteEmployee(employee._id).subscribe({
-    next: () => {
-      this.employees.update(current =>
-        current.filter(item => item._id !== employee._id)
-      );
+   next: () => {
+      // Reload employees from the backend after deletion
+      this.loadEmployees();
 
       if (this.editingEmployeeId() === employee._id) {
         this.cancelEdit();
@@ -205,6 +212,9 @@ deleteEmployee(employee: Employee) {
     }
   });
 }
+
+
+
 
 cancelEdit() {
   this.editingEmployeeId.set(null);
@@ -219,6 +229,7 @@ cancelEdit() {
     salary: 0
   });
 }
+
 
 
 onLogout() {
