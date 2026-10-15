@@ -5,9 +5,14 @@ require('dotenv').config();
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
 
-const PORT = process.env.PORT || 3000;
+const rawPort = process.env.PORT;
 
-console.log('DEPLOY CHECK: PORT =', PORT);
+console.log('DEPLOY CHECK: raw PORT =', JSON.stringify(rawPort));
+console.log('DEPLOY CHECK: PORT type =', typeof rawPort);
+
+const PORT = rawPort || 3000;
+
+console.log('DEPLOY CHECK: resolved PORT =', JSON.stringify(PORT));
 
 connectDB()
   .then(() => {
