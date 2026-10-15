@@ -7,12 +7,7 @@ const connectDB = require('./src/config/db');
 
 const rawPort = process.env.PORT;
 
-console.log('DEPLOY CHECK: raw PORT =', JSON.stringify(rawPort));
-console.log('DEPLOY CHECK: PORT type =', typeof rawPort);
-
 const PORT = rawPort || 3000;
-
-console.log('DEPLOY CHECK: resolved PORT =', JSON.stringify(PORT));
 
 connectDB()
   .then(() => {
